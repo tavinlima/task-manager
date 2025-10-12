@@ -35,7 +35,7 @@ public class ProjetoService {
             if (p.getId().equals(id)) return p;
         }
 
-        throw new NotFoundException("Categoria não encontrada");
+        throw new NotFoundException("Projeto não encontrado");
     }
 
     public Projeto Update(Long id, String nome, String descricao) {

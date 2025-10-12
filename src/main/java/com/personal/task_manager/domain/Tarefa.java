@@ -1,15 +1,19 @@
 package com.personal.task_manager.domain;
 
+import com.personal.task_manager.enums.Prioridade;
+import com.personal.task_manager.enums.Status;
+
 import java.time.LocalDate;
 
 public class Tarefa {
-    private enum Prioridade {
-        BAIXA, MEDIA, ALTA;
-    }
+//    private enum Prioridade {
+//        BAIXA, MEDIA, ALTA;
+//    }
 
-    private enum Status {
-        A_FAZER,FAZENDO,FEITO;
-    }
+//    private enum Status {
+//        A_FAZER,FAZENDO,FEITO,EXCLUIDA;
+//    }
+
     private Long id;
     private String titulo;
     private String descricao;
@@ -31,8 +35,8 @@ public class Tarefa {
         this.idProjeto =idProjeto;
         this.prioridade =Prioridade.BAIXA;
         this.status=Status.A_FAZER;
-        this.criacao = LocalDate.now();
-        this.prazo = LocalDate.now();
+        this.criacao = criacao;
+        this.prazo = prazo;
     }
 
     public LocalDate getPrazo() {
