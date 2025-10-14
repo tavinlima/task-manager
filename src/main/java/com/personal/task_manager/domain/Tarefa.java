@@ -2,140 +2,52 @@ package com.personal.task_manager.domain;
 
 import com.personal.task_manager.enums.Prioridade;
 import com.personal.task_manager.enums.Status;
+import jakarta.persistence.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
+@Entity
+@NoArgsConstructor
+@Data
+@Table(name = "tb_tarefas")
 public class Tarefa {
-//    private enum Prioridade {
-//        BAIXA, MEDIA, ALTA;
-//    }
-
-//    private enum Status {
-//        A_FAZER,FAZENDO,FEITO,EXCLUIDA;
-//    }
-
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String titulo;
-    private String descricao;
-    private Long idProjeto;
-    private Long idResponsavel;
-    private Long idCategoria;
 
-    private Prioridade prioridade ;
-    private Status status;
+    @Column(nullable = false, length = 60)
+    private String titulo;
+
+    @Column(nullable = false, length = 100)
+    private String descricao;
+
+    @ManyToOne
+    @JoinColumn(name = "idProjeto", nullable = false)
+    private Projeto idProjeto;
+
+    @ManyToOne
+    @JoinColumn(name = "idResponsavel", nullable = false)
+    private Usuario idResponsavel;
+
+    @ManyToOne
+    @JoinColumn(name = "idCategoria", nullable = false)
+    private Categoria idCategoria;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Prioridade prioridade = Prioridade.BAIXA;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Status status = Status.A_FAZER;
+
+    @Column(nullable = false)
     private LocalDate criacao;
+
+    @Column(nullable = false)
     private LocalDate prazo;
 
-    public Tarefa(Long idTarefa, String titulo, String descricao, Long idResponsavel, Long idCategoria, Long idProjeto, LocalDate criacao, LocalDate prazo) {
-        this.id = idTarefa;
-        this.titulo =titulo;
-        this.descricao =descricao;
-        this.idResponsavel =idResponsavel;
-        this.idCategoria =idCategoria;
-        this.idProjeto =idProjeto;
-        this.prioridade =Prioridade.BAIXA;
-        this.status=Status.A_FAZER;
-        this.criacao = criacao;
-        this.prazo = prazo;
-    }
 
-    public LocalDate getPrazo() {
-        return prazo;
-    }
-
-    public void setPrazo(LocalDate prazo) {
-        this.prazo = prazo;
-    }
-
-    public String getTitulo() {
-        return titulo;
-    }
-
-    public void setTitulo(String titulo) {
-        this.titulo = titulo;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getDescricao() {
-        return descricao;
-    }
-
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
-    }
-
-    public Long getIdProjeto() {
-        return idProjeto;
-    }
-
-    public void setIdProjeto(Long idProjeto) {
-        this.idProjeto = idProjeto;
-    }
-
-    public Long getIdResponsavel() {
-        return idResponsavel;
-    }
-
-    public void setIdResponsavel(Long idResponsavel) {
-        this.idResponsavel = idResponsavel;
-    }
-
-    public Long getIdCategoria() {
-        return idCategoria;
-    }
-
-    public void setIdCategoria(Long idCategoria) {
-        this.idCategoria = idCategoria;
-    }
-
-    public Prioridade getPrioridade() {
-        return prioridade;
-    }
-
-    public void setPrioridade(Prioridade prioridade) {
-        this.prioridade = prioridade;
-    }
-
-    public Status getStatus() {
-        return status;
-    }
-
-    public String getStatusName() {
-        return status.name();
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
-    }
-
-    public LocalDate getCriacao() {
-        return criacao;
-    }
-
-    public void setCriacao(LocalDate criacao) {
-        this.criacao = criacao;
-    }
-
-    @Override
-    public String toString() {
-        return "Tarefa{" +
-                "prazo=" + prazo +
-                ", criacao=" + criacao +
-                ", status=" + status +
-                ", prioridade=" + prioridade +
-                ", idCategoria=" + idCategoria +
-                ", idResponsavel=" + idResponsavel +
-                ", idProjeto=" + idProjeto +
-                ", descricao='" + descricao + '\'' +
-                ", titulo='" + titulo + '\'' +
-                ", id=" + id +
-                '}';
-    }
 }

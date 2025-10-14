@@ -1,43 +1,31 @@
 package com.personal.task_manager.domain;
 
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name="tb_projetos")
 public class Projeto {
-    private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long idProjeto;
+
+    @Column(name = "nome", nullable = false, length = 60)
     private String nome;
+
+    @Column(name = "descricao", nullable = false, length = 100)
     private String descricao;
 
-    public Projeto(Long id, String nome, String descricao) {
-        this.id = id;
-        this.nome = nome;
-        this.descricao = descricao;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getNome() {
-        return nome;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-
-    public String getDescricao() {
-        return descricao;
-    }
-
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
-    }
     @Override
     public String toString() {
         return "Projeto{" +
-                "id=" + id +
+                "id=" + idProjeto +
                 ", nome='" + nome + '\'' +
                 ", descricao='" + descricao + '\'' +
                 '}';

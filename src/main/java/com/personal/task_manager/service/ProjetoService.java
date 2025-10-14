@@ -3,55 +3,56 @@ package com.personal.task_manager.service;
 import com.personal.task_manager.domain.Categoria;
 import com.personal.task_manager.domain.Projeto;
 import com.personal.task_manager.exceptions.NotFoundException;
+import com.personal.task_manager.repository.ProjetoRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class ProjetoService {
-    private List<Projeto> listaProjetos = new ArrayList<>();
-    private Long contadorProjetos = 2L;
+    private final ProjetoRepository projetoRepository;
 
-    public ProjetoService() {
-        Projeto p1 = new Projeto(1L, "Organização pessoal", "Projeto criado para me ajudar na organização das tarefas de casa");
-        listaProjetos.add(p1);
+    @Autowired
+    public ProjetoService(ProjetoRepository projetoRepository) {
+        this.projetoRepository = projetoRepository;
     }
 
-    public Projeto Add(String nome, String descricao) {
-        Projeto novoProjeto = new Projeto(contadorProjetos, nome, descricao);
-        listaProjetos.add(novoProjeto);
-
-        return novoProjeto;
-    }
-
-    public List<Projeto> ListAll() {
-        return listaProjetos;
-    }
-
-    public Projeto GetById(Long id) {
-        for (Projeto p : listaProjetos) {
-            if (p.getId().equals(id)) return p;
+    public Projeto add(Projeto projeto) throws Exception {
+        if(projeto.getNome().isEmpty() || projeto.getDescricao().isEmpty()) {
+            throw new Exception("Todos os campos devem ser preenchidos!");
         }
-
-        throw new NotFoundException("Projeto não encontrado");
+        return projetoRepository.save(projeto);
     }
 
-    public Projeto Update(Long id, String nome, String descricao) {
-        for (Projeto p : listaProjetos) {
-            if (p.getId().equals(id)) {
-                p.setNome(nome);
-                p.setDescricao(descricao);
-                return p;
-            }
+    public List<Projeto> listAll() {
+        return projetoRepository.findAll();
+    }
+
+    public Projeto getById(Long id) throws NotFoundException {
+        return projetoRepository.findById(id).orElseThrow(() -> new NotFoundException("Projeto não encontrado"));
+    }
+
+    public Projeto update(Long id, String nome, String descricao) {
+        Optional<Projeto> projeto = projetoRepository.findById(id);
+
+        if(projeto.isEmpty()) {
+            throw new NotFoundException("Projeto não encontrado");
         }
-        throw new NotFoundException("Projeto não encontrado");
+        Projeto projetoAtual = projeto.get();
+        projetoAtual.setNome(nome);
+        projetoAtual.setDescricao(descricao);
+        return projetoRepository.save(projetoAtual);
     }
 
-    public void Delete(Long id) {
-        boolean removido = listaProjetos.removeIf(p -> p.getId().equals(id));
+    public void delete(Long id) {
+        if(!projetoRepository.existsById(id)){
 
-        if (!removido) throw new NotFoundException("Projeto não encontrado");
+            throw new NotFoundException("Projeto não encontrado");
+        }
+        projetoRepository.deleteById(id);
     }
 }

@@ -1,11 +1,9 @@
 package com.personal.task_manager.repository;
 
-import com.personal.task_manager.domain.Tarefa;
+import com.personal.task_manager.domain.Categoria;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-
 @Repository
-public interface TarefaRepository extends JpaRepository<Tarefa, Long> {
-
+public interface CategoriaRepository extends JpaRepository<Categoria, Long> {
 }

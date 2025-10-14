@@ -2,59 +2,57 @@ package com.personal.task_manager.service;
 
 import com.personal.task_manager.domain.Usuario;
 import com.personal.task_manager.exceptions.NotFoundException;
+import com.personal.task_manager.repository.UsuarioRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UsuarioService {
-    private List<Usuario> listaUsuarios = new ArrayList<Usuario>();
-    private Long contadorUsuarios = 2l;
+    private final UsuarioRepository usuarioRepository;
 
-    public UsuarioService() {
-        Usuario novoUsuario = new Usuario(0l, "Dan Reynolds", "dan@email.com");
-        Usuario novoUsuario2 = new Usuario(1l, "Taylor Swift", "taylor@email.com");
-        Usuario novoUsuario3 = new Usuario(2l, "Odete Roitman", "odete@email.com");
-
-        listaUsuarios.add(novoUsuario);
-        listaUsuarios.add(novoUsuario2);
-        listaUsuarios.add(novoUsuario3);
+    @Autowired
+    public UsuarioService(UsuarioRepository usuarioRepository) {
+        this.usuarioRepository = usuarioRepository;
     }
 
-    public List<Usuario> ListAll() {
-        return this.listaUsuarios;
+    public List<Usuario> listAll() {
+        return usuarioRepository.findAll();
     }
 
-    public Usuario GetById(long id) {
-        for (Usuario usuario : listaUsuarios) {
-            if (usuario.getId().equals(id)) return usuario;
+    public Usuario getById(Long id) throws NotFoundException {
+        return usuarioRepository.findById(id).orElseThrow(() -> new NotFoundException("Usuário não encontrado"));
+    }
+
+    public Usuario add(Usuario usuario) throws Exception {
+        if(usuario.getNome().isEmpty() || usuario.getEmail().isEmpty()) {
+            throw new Exception("Os campos não podem estar vazios");
         }
-        throw new NotFoundException("Usuário não encontrado");
+
+        return usuarioRepository.save(usuario);
     }
 
-    public Usuario Add(String nome, String email) {
-        contadorUsuarios++;
-        Usuario novoUsuario = new Usuario(contadorUsuarios, nome, email);
-        listaUsuarios.add(novoUsuario);
-        return novoUsuario;
-    }
+    public Usuario update(Long id, String nome, String email) {
+        Optional<Usuario> usuarioBuscado = usuarioRepository.findById(id);
 
-    public Usuario Update(Long id, String nome, String email) {
-        for(Usuario usuario: listaUsuarios) {
-            if (usuario.getId().equals(id)) {
-                usuario.setNome(nome);
-                usuario.setEmail(email);
-                return usuario;
-            }
+        if(usuarioBuscado.isEmpty()) {
+            throw new NotFoundException ("Usuário não encontrado");
         }
-        throw new NotFoundException("Usuário não encontrado");
+        Usuario usuarioAtual = usuarioBuscado.get();
+        usuarioAtual.setNome(nome);
+        usuarioAtual.setEmail(email);
+        return usuarioRepository.save(usuarioAtual);
+
     }
 
-    public void Delete(long id) {
-        boolean removido = this.listaUsuarios.removeIf(user -> user.getId() == id);
-        if (!removido) {
+    public void delete(Long id) {
+        if(!usuarioRepository.existsById(id)) {
             throw new NotFoundException("Usuário não encontrado");
         }
+        usuarioRepository.deleteById(id);
     }
+
+
 }

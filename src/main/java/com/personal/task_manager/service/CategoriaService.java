@@ -3,56 +3,56 @@ package com.personal.task_manager.service;
 import com.personal.task_manager.domain.Categoria;
 import com.personal.task_manager.domain.Usuario;
 import com.personal.task_manager.exceptions.NotFoundException;
+import com.personal.task_manager.repository.CategoriaRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CategoriaService {
-    private List<Categoria> listaCategorias = new ArrayList<Categoria>();
-    private Long contadorCategorias = 3L;
+    private final CategoriaRepository categoriaRepository;
 
-    public CategoriaService() {
-        Categoria c1 = new Categoria(1L, "Cotidiano");
-        Categoria c2 = new Categoria(2L, "Faculdade");
-        listaCategorias.add(c1);
-        listaCategorias.add(c2);
+    @Autowired
+    public CategoriaService(CategoriaRepository categoriaRepository) {
+        this.categoriaRepository = categoriaRepository;
     }
 
-    public Categoria Add(String nome) {
-        contadorCategorias++;
-        Categoria novaCategoria = new Categoria(contadorCategorias, nome);
-        listaCategorias.add(novaCategoria);
-
-        return novaCategoria;
-    }
-
-    public Categoria GetById(Long id) {
-        for (Categoria cat : listaCategorias) {
-            if (cat.getId().equals(id)) return cat;
+    public Categoria add(Categoria categoria) throws Exception {
+        if (categoria.getNome().isEmpty()) {
+            throw new Exception("Os campos não podem estar vazios");
         }
 
-        throw new NotFoundException("Categoria não encontrada");
+        return categoriaRepository.save(categoria);
     }
 
-    public List<Categoria> ListAll() {
-        return this.listaCategorias;
+    public Categoria getById(Long id) {
+        return categoriaRepository.findById(id).orElseThrow(() -> new NotFoundException("Categoria não encontrada"));
     }
 
-    public Categoria Update(Long id, String nome) {
-        for(Categoria categoria: listaCategorias) {
-            if (categoria.getId().equals(id)) {
-                categoria.setNome(nome);
-                return categoria;
-            }
+    public List<Categoria> listAll() {
+        return categoriaRepository.findAll();
+    }
+
+    public Categoria update(Long id, String nome) {
+        Optional<Categoria> categoria = categoriaRepository.findById(id);
+
+        if (categoria.isEmpty()) {
+            throw new NotFoundException("Categoria não encontrada");
         }
-        throw new NotFoundException("Categoria não encontrada");
+        Categoria categoriaAtual = categoria.get();
+        categoriaAtual.setNome(nome);
+
+        return categoriaRepository.save(categoriaAtual);
+
     }
 
-    public void Delete(Long id) {
-        boolean removido = listaCategorias.removeIf(cat -> cat.getId() == id);
-
-        if(!removido) throw new NotFoundException("Categoria não encontrada");
+    public void delete(Long id) {
+        if (!categoriaRepository.existsById(id)) {
+            throw new NotFoundException("Categoria não encontrada");
+        }
+        categoriaRepository.deleteById(id);
     }
 }

@@ -1,25 +1,32 @@
 package com.personal.task_manager.domain;
 
+import jakarta.persistence.*;
+import lombok.*;
 
+@Entity
+@Table(name="tb_usuarios")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 public class Usuario {
-    private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long idUsuario;
 
+    @Column(name="nome", nullable=false, length=60)
     private String nome;
 
+    @Column(name="email", nullable=false, length=256)
     private String email;
 
-    public Usuario(Long id, String nome, String email) {
-        this.id = id;
-        this.nome = nome;
-        this.email = email;
+    public Long getIdUsuario() {
+        return idUsuario;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+    public void setIdUsuario(Long idUsuario) {
+        this.idUsuario = idUsuario;
     }
 
     public String getNome() {
@@ -41,7 +48,7 @@ public class Usuario {
     @Override
     public String toString() {
         return "Usuario{" +
-                "id=" + id +
+                "id=" + idUsuario +
                 ", nome='" + nome + '\'' +
                 ", email='" + email + '\'' +
                 '}';

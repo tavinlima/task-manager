@@ -1,6 +1,11 @@
 package com.personal.task_manager.controller;
 
+import com.personal.task_manager.domain.Categoria;
+import com.personal.task_manager.domain.Projeto;
 import com.personal.task_manager.domain.Tarefa;
+import com.personal.task_manager.domain.Usuario;
+import com.personal.task_manager.dto.tarefa.TarefaCreateDTO;
+import com.personal.task_manager.dto.tarefa.TarefaUpdateDTO;
 import com.personal.task_manager.enums.Prioridade;
 import com.personal.task_manager.enums.Status;
 import com.personal.task_manager.exceptions.NotFoundException;
@@ -81,7 +86,7 @@ public class ConsoleController implements CommandLineRunner {
 
     }
 
-    public void GerenciarUsuarios() {
+    public void GerenciarUsuarios() throws Exception {
         opcao = 0;
 
         do {
@@ -112,15 +117,20 @@ public class ConsoleController implements CommandLineRunner {
                     String email = scanner.nextLine();
 
                     //Chamando a função que realiza o cadastro
-                    usuarioService.Add(nome, email);
+                    Usuario newUser = new Usuario();
+                    newUser.setNome(nome);
+                    newUser.setEmail(email);
+
+                    usuarioService.add(newUser);
                     System.out.println("Usuário cadastrado com sucesso!");
                     break;
                 case 2:
                     System.out.println("Usuários do sistema: ");
 
-                    usuarioService.ListAll().forEach(user -> {
+                    usuarioService.listAll().forEach(user -> {
                         System.out.println("Nome: " + user.getNome());
                         System.out.println("E-mail: " + user.getEmail());
+                        System.out.println("======================\n");
                     });
 
                     break;
@@ -131,7 +141,7 @@ public class ConsoleController implements CommandLineRunner {
 
                     //Verificação para retornar o usuário caso seja encontrado, ou lançar a exceção caso o usuário ainda não exista
                     try {
-                        System.out.println(usuarioService.GetById(id));
+                        System.out.println(usuarioService.getById(id));
                     } catch (NotFoundException e) {
                         System.out.println(e.getMessage());
                     }
@@ -144,7 +154,7 @@ public class ConsoleController implements CommandLineRunner {
                         long id = Long.parseLong(scanner.nextLine());
                         //Verificação para alterar o usuário caso seja encontrado, ou lançar a exceção caso o usuário ainda não exista
                         try {
-                            usuarioService.GetById(id);
+                            usuarioService.getById(id);
 
                             System.out.println("Digite o novo nome: ");
 
@@ -153,7 +163,7 @@ public class ConsoleController implements CommandLineRunner {
                             System.out.println("Digite o novo email: ");
                             String novoEmail = scanner.nextLine();
 
-                            usuarioService.Update(id, novoNome, novoEmail);
+                            usuarioService.update(id, novoNome, novoEmail);
                             usuarioEncontrado = true;
                         } catch (NotFoundException e) {
                             usuarioEncontrado = false;
@@ -169,9 +179,9 @@ public class ConsoleController implements CommandLineRunner {
                     long id = Long.parseLong(scanner.nextLine());
                     //Verificação para impedir que um usuário associado a uma tarefa seja excluído
                     try {
-                        if (!tarefaService.SearchAssociations(id)) {
+                        if (!tarefaService.searchAssociations(id)) {
                             //Caso não exista nenhuma associação, o usuário é deletado
-                            usuarioService.Delete(id);
+                            usuarioService.delete(id);
                             System.out.println("Usuário removido com sucesso!");
 
                         }
@@ -189,7 +199,7 @@ public class ConsoleController implements CommandLineRunner {
         } while (opcao != 6);
     }
 
-    public void GerenciarCategorias() {
+    public void GerenciarCategorias() throws Exception {
         opcao = 0;
 
         do {
@@ -214,19 +224,28 @@ public class ConsoleController implements CommandLineRunner {
                     System.out.println("Título da categoria");
                     String titulo = scanner.nextLine();
 
-                    categoriaService.Add(titulo);
-                    System.out.println("Categoria cadastrada com sucesso!");
+                    Categoria novaCategoria = new Categoria();
+                    novaCategoria.setNome(titulo);
+                    try {
+                        categoriaService.add(novaCategoria);
+
+                        System.out.println("Categoria cadastrada com sucesso!");
+                    } catch (Exception e) {
+                        System.out.println(e.getMessage());
+                    }
+
                     break;
                 case 2:
                     System.out.println("Categorias do sistema: ");
-                    categoriaService.ListAll().forEach(cat -> System.out.println(cat.toString()));
+                    categoriaService.listAll().forEach(cat -> System.out.println("Categoria: " + cat.getNome()));
+
                     break;
                 case 3: {
                     System.out.println("Digite o id da categoria que deseja procurar: ");
                     long id = Long.parseLong(scanner.nextLine());
 
                     try {
-                        System.out.println(categoriaService.GetById(id));
+                        System.out.println(categoriaService.getById(id));
                     } catch (NotFoundException e) {
                         System.out.println(e.getMessage());
                     }
@@ -239,12 +258,12 @@ public class ConsoleController implements CommandLineRunner {
                         long id = Long.parseLong(scanner.nextLine());
 
                         try {
-                            categoriaService.GetById(id);
+                            categoriaService.getById(id);
 
                             System.out.println("Digite o novo nome: ");
                             String novoNome = scanner.nextLine();
 
-                            categoriaService.Update(id, novoNome);
+                            categoriaService.update(id, novoNome);
                             categoriaEncontrada = true;
                         } catch (NotFoundException e) {
                             categoriaEncontrada = false;
@@ -258,8 +277,8 @@ public class ConsoleController implements CommandLineRunner {
                     long id = Long.parseLong(scanner.nextLine());
 
                     try {
-                        if (!tarefaService.SearchAssociations(id)) {
-                            categoriaService.Delete(id);
+                        if (!tarefaService.searchAssociations(id)) {
+                            categoriaService.delete(id);
                             System.out.println("Categoria removida com sucesso!");
 
                         }
@@ -300,9 +319,9 @@ public class ConsoleController implements CommandLineRunner {
             scanner.nextLine(); // limpar buffer
 
             boolean existe;
-            Long idResponsavel = 0L;
-            Long idCategoria = 0L;
-            Long idProjeto = 0L;
+            long idResponsavel = 0L;
+            long idCategoria = 0L;
+            long idProjeto = 0L;
             switch (opcao) {
                 case 1:
                     System.out.print("Título: ");
@@ -314,8 +333,8 @@ public class ConsoleController implements CommandLineRunner {
                     do {
                         System.out.print("Id do responsável: ");
                         idResponsavel = Long.parseLong(scanner.nextLine());
-                        try{
-                            usuarioService.GetById(idResponsavel);
+                        try {
+                            usuarioService.getById(idResponsavel);
                             existe = true;
                         } catch (NotFoundException e) {
                             System.out.println(e.getMessage());
@@ -326,8 +345,8 @@ public class ConsoleController implements CommandLineRunner {
                     do {
                         System.out.print("Id da categoria: ");
                         idCategoria = Long.parseLong(scanner.nextLine());
-                        try{
-                            categoriaService.GetById(idCategoria);
+                        try {
+                            categoriaService.getById(idCategoria);
                             existe = true;
                         } catch (NotFoundException e) {
                             System.out.println(e.getMessage());
@@ -338,8 +357,8 @@ public class ConsoleController implements CommandLineRunner {
                     do {
                         System.out.print("Id do projeto: ");
                         idProjeto = Long.parseLong(scanner.nextLine());
-                        try{
-                            projetoService.GetById(idProjeto);
+                        try {
+                            projetoService.getById(idProjeto);
                             existe = true;
                         } catch (NotFoundException e) {
                             System.out.println(e.getMessage());
@@ -355,50 +374,70 @@ public class ConsoleController implements CommandLineRunner {
                     System.out.print("Data de entrega da tarefa: ");
                     LocalDate prazo = LocalDate.parse(scanner.nextLine(), formatador);
 
-                    tarefaService.Add(titulo, descricao, idResponsavel, idCategoria, idProjeto, criacao, prazo);
-                    System.out.println("Tarefa Criada com sucesso!");
+                    TarefaCreateDTO novaTarefa = new TarefaCreateDTO();
+                    novaTarefa.setTitulo(titulo);
+                    novaTarefa.setDescricao(descricao);
+                    novaTarefa.setIdResponsavel(idResponsavel);
+                    novaTarefa.setIdCategoria(idCategoria);
+                    novaTarefa.setIdProjeto(idProjeto);
+
+                    novaTarefa.setCriacao(criacao);
+                    novaTarefa.setPrazo(prazo);
+
+                    try {
+                        tarefaService.add(novaTarefa);
+                        System.out.println("Tarefa Criada com sucesso!");
+                    } catch (Exception e) {
+                        System.out.println(e.getMessage());
+                    }
+
+
                     break;
                 case 2:
                     System.out.println("Tarefas criadas: ");
-                    System.out.println("Quantidade de tarefas: " + (long) tarefaService.ListAll().size());
+                    System.out.println("Quantidade de tarefas: " + (long) tarefaService.listAll().size());
 
 
                     //O Map é um objeto que mapeia valores para as chaves
                     //Nesse caso, a chave seria o nome do usuário que quero descobrir as tarefas
                     //E o valor, a quantidade de tarefas associadas a ele
                     //Essa função .collect agrega os elementos da lista por um argumento, nesse caso, pelo Id do responsável
-                    Map<Long, Long> tarefasPorUsuario = tarefaService.ListAll().stream().collect(
-                            Collectors.groupingBy(
-                                    Tarefa::getIdResponsavel,
-                                    Collectors.counting()
-                            ));
-                    tarefasPorUsuario.forEach((id, quantidade) -> {
-                        System.out.println("Usuário: "+  usuarioService.GetById(id).getNome() + ". Quantidade de tarefas: " + quantidade);
-                    });
+                    Map<Long, Long> tarefasPorUsuario = tarefaService.listAll().stream()
+                            .collect(Collectors.groupingBy(t -> t.getIdResponsavel().getIdUsuario(), Collectors.counting()));
 
-                    Map<Long, Long> tarefasPorProjeto = tarefaService.ListAll().stream().collect(
-                            Collectors.groupingBy(
-                                    Tarefa::getIdProjeto,
-                                    Collectors.counting()
-                            ));
+                    for (Map.Entry<Long, Long> entry : tarefasPorUsuario.entrySet()) {
+                        Long userId = entry.getKey();
+                        Long quantidade = entry.getValue();
 
-                    tarefasPorProjeto.forEach((id, quantidade) -> {
-                        System.out.println("Projeto: "+  projetoService.GetById(id).getNome() + ". Quantidade de tarefas: " + quantidade);
-                    });
+                        Usuario u = usuarioService.getById(userId);
+                        System.out.println("Usuário: " + u.getNome() + ". Quantidade de tarefas: " + quantidade);
 
-                    tarefaService.ListAll().forEach(this::ListTarefa);
+                    }
+
+                    Map<Long, Long> tarefasPorProjeto = tarefaService.listAll().stream()
+                            .collect(Collectors.groupingBy(t -> t.getIdProjeto().getIdProjeto(), Collectors.counting()));
+
+                    for (Map.Entry<Long, Long> entry : tarefasPorProjeto.entrySet()) {
+                        Long projectId = entry.getKey();
+                        Long quantidade = entry.getValue();
+                        Projeto u = projetoService.getById(projectId);
+                        System.out.println("Projeto: " + u.getNome() + ". Quantidade de tarefas: " + quantidade);
+
+                    }
+
+                    tarefaService.listAll().forEach(this::ListTarefa);
 
                     break;
                 case 3:
                     System.out.println("Tarefas vencidas: ");
-                    tarefaService.ListAll().forEach(tarefa -> {
+                    tarefaService.listAll().forEach(tarefa -> {
                         if (tarefa.getPrazo().isBefore(LocalDate.now())) ListTarefa(tarefa);
                     });
                     break;
                 case 4:
                     System.out.println("Tarefas a fazer: ");
                     try {
-                        tarefaService.ListByStatus("A_FAZER").forEach(this::ListTarefa);
+                        tarefaService.listByStatus(Status.A_FAZER).forEach(this::ListTarefa);
                     } catch (NotFoundException e) {
                         System.out.println(e.getMessage());
                     }
@@ -407,7 +446,7 @@ public class ConsoleController implements CommandLineRunner {
                     System.out.println("Tarefas sendo feitas: ");
 
                     try {
-                        tarefaService.ListByStatus("FAZENDO").forEach(this::ListTarefa);
+                        tarefaService.listByStatus(Status.FAZENDO).forEach(this::ListTarefa);
                     } catch (NotFoundException e) {
                         System.out.println(e.getMessage());
                     }
@@ -416,7 +455,7 @@ public class ConsoleController implements CommandLineRunner {
                 case 6:
                     System.out.println("Tarefas concluídas: ");
                     try {
-                        tarefaService.ListByStatus("FEITO").forEach(this::ListTarefa);
+                        tarefaService.listByStatus(Status.FEITO).forEach(this::ListTarefa);
                     } catch (NotFoundException e) {
                         System.out.println(e.getMessage());
                     }
@@ -428,35 +467,35 @@ public class ConsoleController implements CommandLineRunner {
                     System.out.println("Qual o id da tarefa deseja alterar?");
                     Long id = Long.parseLong(scanner.nextLine());
 
-                    System.out.print("Título: ");
+                    System.out.println("Título: ");
                     titulo = scanner.nextLine();
 
-                    System.out.print("Descrição: ");
+                    System.out.println("Descrição: ");
                     descricao = scanner.nextLine();
                     existe = false;
 
                     do {
-                        System.out.print("Id do responsável: ");
+                        System.out.println("Id do responsável: ");
                         idResponsavel = Long.parseLong(scanner.nextLine());
-                        if (usuarioService.GetById(idResponsavel) != null) existe = true;
+                        if (usuarioService.getById(idResponsavel) != null) existe = true;
                     } while (!existe);
 
-                    System.out.print("Id da categoria: ");
+                    System.out.println("Id da categoria: ");
                     idCategoria = Long.parseLong(scanner.nextLine());
 
-                    System.out.print("Id do projeto: ");
+                    System.out.println("Id do projeto: ");
                     idProjeto = Long.parseLong(scanner.nextLine());
 
-                    System.out.print("Data de criação da tarefa: ");
+                    System.out.println("Data de criação da tarefa: ");
                     criacao = LocalDate.parse(scanner.nextLine(), formatador);
 
-                    System.out.print("Data de entrega da tarefa: ");
+                    System.out.println("Data de entrega da tarefa: ");
                     prazo = LocalDate.parse(scanner.nextLine(), formatador);
 
-                    System.out.print("Prioridade: ");
-                    System.out.print("1 - Baixa");
-                    System.out.print("2 - Média");
-                    System.out.print("3 - Alta");
+                    System.out.println("Prioridade: ");
+                    System.out.println("1 - Baixa");
+                    System.out.println("2 - Média");
+                    System.out.println("3 - Alta");
                     int prioridade = scanner.nextInt();
                     scanner.nextLine();
 
@@ -469,10 +508,10 @@ public class ConsoleController implements CommandLineRunner {
                         default -> Prioridade.BAIXA;
                     };
 
-                    System.out.print("Status: ");
-                    System.out.print("1 - A fazer");
-                    System.out.print("2 - Fazendo");
-                    System.out.print("3 - Feito");
+                    System.out.println("Status: ");
+                    System.out.println("1 - A fazer");
+                    System.out.println("2 - Fazendo");
+                    System.out.println("3 - Feito");
                     int status = scanner.nextInt();
                     scanner.nextLine();
 
@@ -485,7 +524,19 @@ public class ConsoleController implements CommandLineRunner {
                     };
 
                     try {
-                        tarefaService.Update(id, titulo, descricao, idResponsavel, idCategoria, idProjeto, criacao, prazo, s, p);
+                        TarefaUpdateDTO tarefAtual = new TarefaUpdateDTO();
+                        tarefAtual.setId(id);
+                        tarefAtual.setTitulo(titulo);
+                        tarefAtual.setDescricao(descricao);
+                        tarefAtual.setIdResponsavel(idResponsavel);
+                        tarefAtual.setIdCategoria(idCategoria);
+                        tarefAtual.setIdProjeto(idProjeto);
+
+                        tarefAtual.setCriacao(criacao);
+                        tarefAtual.setPrazo(prazo);
+                        tarefAtual.setPrioridade(p);
+                        tarefAtual.setStatus(s);
+                        tarefaService.update(tarefAtual);
                         System.out.println("Tarefa atualizada com sucesso!");
                     } catch (NotFoundException e) {
                         System.out.println(e.getMessage());
@@ -494,9 +545,31 @@ public class ConsoleController implements CommandLineRunner {
                 }
                 break;
                 case 8:
-                    System.out.println("Tarefas concluídas: ");
                     try {
-                        tarefaService.ListByStatus("FEITO").forEach(this::ListTarefa);
+                        existe = false;
+                        Long idTarefa;
+                        do {
+                        System.out.println("Qual o id da tarefa deseja alterar?");
+                        idTarefa = Long.parseLong(scanner.nextLine());
+                            if (tarefaService.getById(idTarefa) != null) existe = true;
+                        } while (!existe);
+
+                        System.out.println("Para qual status deseja mover? ");
+                        System.out.println("1 - A fazer");
+                        System.out.println("2 - Fazendo");
+                        System.out.println("3 - Feito");
+                        int status = scanner.nextInt();
+                        scanner.nextLine();
+
+                        Status s = switch (status) {
+                            case 1 -> Status.A_FAZER;
+                            case 2 -> Status.FAZENDO;
+                            case 3 -> Status.FEITO;
+                            default -> Status.A_FAZER;
+                        };
+
+                        tarefaService.updateStatus(s, idTarefa);
+                        System.out.println("Tarefa atualizada com sucesso!");
                     } catch (NotFoundException e) {
                         System.out.println(e.getMessage());
                     }
@@ -507,9 +580,9 @@ public class ConsoleController implements CommandLineRunner {
                     Long id = Long.parseLong(scanner.nextLine());
 
                     try {
-                        tarefaService.Delete(id);
+                        tarefaService.delete(id);
                         System.out.println("Tarefa deletado com sucesso!");
-                    } catch (NotFoundException e) {
+                    } catch (Exception e) {
                         System.out.println(e.getMessage());
                     }
 
@@ -534,9 +607,9 @@ public class ConsoleController implements CommandLineRunner {
         System.out.println("Prioridade: " + tarefa.getPrioridade());
         System.out.println("Data de criação: " + tarefa.getCriacao());
         System.out.println("Prazo para conclusão: " + tarefa.getPrazo());
-        System.out.println("Responsável: " + usuarioService.GetById(tarefa.getIdResponsavel()).getNome());
-        System.out.println("Projeto: " + projetoService.GetById(tarefa.getIdProjeto()).getNome());
-        System.out.println("Categoria: " + categoriaService.GetById(tarefa.getIdCategoria()).getNome());
+        System.out.println("Responsável: " + usuarioService.getById(tarefa.getIdResponsavel().getIdUsuario()).getNome());
+        System.out.println("Projeto: " + projetoService.getById(tarefa.getIdProjeto().getIdProjeto()).getNome());
+        System.out.println("Categoria: " + categoriaService.getById(tarefa.getIdCategoria().getIdCategoria()).getNome());
         System.out.println("========================\n");
     }
 
@@ -568,19 +641,31 @@ public class ConsoleController implements CommandLineRunner {
                     System.out.println("Descrição do projeto: ");
                     String descricao = scanner.nextLine();
 
-                    projetoService.Add(nome, descricao);
-                    System.out.println("Projeto cadastrado com sucesso!");
+                    Projeto novoProjeto = new Projeto();
+                    novoProjeto.setNome(nome);
+                    novoProjeto.setDescricao(descricao);
+                    try {
+                        projetoService.add(novoProjeto);
+                        System.out.println("Projeto cadastrado com sucesso!");
+                    } catch (Exception e) {
+                        System.out.println(e.getMessage());
+                    }
+
                     break;
                 case 2:
                     System.out.println("Projetos do sistema: ");
-                    projetoService.ListAll().forEach(p -> System.out.println(p.toString()));
+                    projetoService.listAll().forEach(p -> {
+                        System.out.println("Projeto: " + p.getNome());
+                        System.out.println("Descrição: " + p.getDescricao());
+                        System.out.println("=====================\n");
+                    });
                     break;
                 case 3: {
                     System.out.println("Digite o id do projeto que deseja procurar: ");
                     long id = Long.parseLong(scanner.nextLine());
 
                     try {
-                        System.out.println(projetoService.GetById(id));
+                        System.out.println(projetoService.getById(id));
                     } catch (NotFoundException e) {
                         System.out.println(e.getMessage());
                     }
@@ -589,11 +674,11 @@ public class ConsoleController implements CommandLineRunner {
                 case 4:
                     boolean projetoEncontrado;
                     do {
-                        System.out.println("Digite o id do usuário que deseja alterar: ");
+                        System.out.println("Digite o id do projeto que deseja alterar: ");
                         long id = Long.parseLong(scanner.nextLine());
 
                         try {
-                            projetoService.GetById(id);
+                            projetoService.getById(id);
 
                             System.out.println("Digite o novo nome: ");
                             String novoNome = scanner.nextLine();
@@ -601,7 +686,7 @@ public class ConsoleController implements CommandLineRunner {
                             System.out.println("Digite a nova descrição: ");
                             String novaDescricao = scanner.nextLine();
 
-                            projetoService.Update(id, novoNome, novaDescricao);
+                            projetoService.update(id, novoNome, novaDescricao);
                             projetoEncontrado = true;
                         } catch (NotFoundException e) {
                             projetoEncontrado = false;
@@ -615,12 +700,12 @@ public class ConsoleController implements CommandLineRunner {
                     long id = Long.parseLong(scanner.nextLine());
 
                     try {
-                        if (!tarefaService.SearchAssociations(id)) {
-                            projetoService.Delete(id);
+                        if (!tarefaService.searchAssociations(id)) {
+                            projetoService.delete(id);
                             System.out.println("Projeto removido com sucesso!");
                         }
 
-                        System.out.println("Só é permitido excluir um projetp se não houver tarefas associadas a ele!");
+                        System.out.println("Só é permitido excluir um projeto se não houver tarefas associadas a ele!");
                     } catch (NotFoundException e) {
                         System.out.println(e.getMessage());
                     }
