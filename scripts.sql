@@ -1,5 +1,9 @@
 --Criação das tabelas do projeto em SQL
 --DDL
+CREATE DATABASE taskmanager;
+
+USE taskmanager;
+
 CREATE TABLE tb_categorias (
   id_categoria INTEGER PRIMARY KEY,
   nome TEXT NOT NULL
