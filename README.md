@@ -2,8 +2,10 @@
 
 Repositório com a atividade 1 da aula de Linguagem de Programação III, do curso de Análise e Desenvolvimento de Sistemas do Instituto Federal de São Paulo.
 
-## Diagrama - Banco de dados
-- <img width="3402" height="2268" alt="image" src="https://github.com/user-attachments/assets/694c753a-078a-4f50-82df-75050b07ad21" />
+## Banco de dados
+### Diagrama
+<img width="3402" height="2268" alt="image" src="https://github.com/user-attachments/assets/694c753a-078a-4f50-82df-75050b07ad21" />
+- Scripts: https://github.com/tavinlima/task-manager/blob/main/scripts.sql 
 
 ## Stack utilizada
 
